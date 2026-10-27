@@ -1,11 +1,15 @@
 # App-estudio-de-pilates
-Sistema de reservas y gestión de clases para estudio de pilates
 
-# Sistema de reservas y gestión de clases para estudio de pilates
+🚀 Podés acceder a través del siguiente enlace :
+
+👉 **[Sistema de reservas y gestión de clases](https://script.google.com/macros/s/AKfycbyfil5hZLJVYJKpIilhb6-hArWerqh0uDXzWVB6_S9FwjBznPOllDnyQF8wNFJOzMcW/exec)**
+
 
 Aplicación web para centro de Pilates: los alumnos reservan sus clases desde el celular y la administración gestiona clientes, packs, agenda, asistencia y reportes. Funciona sin servidor propio, sobre Google Apps Script, Google Sheets y Google Calendar.
 
 **Estado:** MVP v1.0. Resuelve el ciclo completo → pack → reserva → asistencia → reporte. Los límites conocidos y el plan de evolución están en la documentación técnico-funcional.
+
+Desarrollado originalmente para **Cuore Pilates**.
 
 ---
 ## Qué hace
@@ -162,7 +166,7 @@ Las ideas y los reportes de errores son bienvenidos.
 ## Autoría
 
 © 2026 Cordoba Rocio. **Todos los derechos reservados.**
-Desarrollado originalmente para **Cuore Pilates**.
+
 
 
 
