@@ -7,7 +7,7 @@
 
 Aplicación web para centro de Pilates: los alumnos reservan sus clases desde el celular y la administración gestiona clientes, packs, agenda, asistencia y reportes. Funciona sin servidor propio, sobre Google Apps Script, Google Sheets y Google Calendar.
 
-**Estado:** MVP v1.0. Resuelve el ciclo completo → pack → reserva → asistencia → reporte. Los límites conocidos y el plan de evolución están en la documentación técnico-funcional.
+**Estado:** MVP v1.0. Resuelve el ciclo completo → pack → reserva → asistencia → reporte. Los límites conocidos y el plan de evolución están en la documentación.
 
 Desarrollado originalmente para **Cuore Pilates**.
 
