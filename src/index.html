@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clases de Pilates</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{--p:#1A73E8;--bg:#F1F3F4;--t:#202124;--t2:#5F6368;--b:#DADCE0;--act:#E8F0FE}
+body{font:400 14px 'Google Sans',Roboto,sans-serif;background:var(--bg);color:var(--t);margin:0}
+h1,h2,h3{font-weight:500}h1{font-size:22px}h2{font-size:18px}h3{font-size:16px}
+.card{background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(60,64,67,.3),0 2px 6px 2px rgba(60,64,67,.15)}
+.t2{color:var(--t2)}.sm{font-size:12px}
+.btn{background:var(--p);color:#fff;border-radius:999px;padding:8px 20px;font-weight:500;cursor:pointer;border:1px solid var(--p)}
+.btn:hover{filter:brightness(.92)}
+.btn.o{background:#fff;color:var(--p);border-color:var(--b)}.btn.o:hover{background:var(--act)}
+.btn.r{background:#fff;color:#C5221F;border-color:var(--b)}.btn.r:hover{background:#FCE8E6}
+.btn.s{padding:4px 14px}
+.btn:focus-visible,.inp:focus-visible,.tab:focus-visible,.mday:focus-visible,.ib:focus-visible{outline:2px solid var(--p);outline-offset:2px}
+.inp{border:1px solid var(--b);border-radius:12px;padding:10px 12px;width:100%;background:#fff}
+.inp:focus,.inp:not(:placeholder-shown){background:var(--act);border-color:var(--p);outline:none}
+.tab{padding:8px 16px;border-radius:999px;cursor:pointer;color:var(--t2);font-weight:500}
+.tab.on{background:var(--act);color:var(--p)}
+.slot{display:block;position:relative;border:1px solid var(--b);border-radius:999px;color:var(--p);padding:6px 8px;text-align:center;cursor:pointer;margin-bottom:6px;font-weight:500;background:#fff}
+.slot small{display:block;font-size:12px;font-weight:400;color:var(--t2)}
+.slot:hover{background:var(--act)}
+.slot input{position:absolute;opacity:0;pointer-events:none}
+.slot:has(input:checked){background:var(--p);color:#fff}.slot:has(input:checked) small{color:#fff}
+.slot:has(input:focus-visible){outline:2px solid var(--p);outline-offset:2px}
+.slot.off{color:#9AA0A6;background:#F8F9FA;cursor:not-allowed}.slot.off small{color:#9AA0A6}
+.slot.mine{background:var(--act);border-color:var(--p);cursor:default}
+.slot.full{color:#C5221F}.slot.full small{color:#C5221F;font-weight:500}
+.slot.pick{background:#EFF6FF;color:#1E3A8A;border:2px solid #3B82F6}
+.slot.pick.on{background:#1D4ED8;color:#fff;border-color:#1E40AF;font-weight:700}.slot.pick.on small{color:#E0E7FF}
+.day{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.day.today{background:var(--p);color:#fff}
+.mday{width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;background:none;border:0;color:var(--t)}
+.mday:hover{background:var(--bg)}.mday.otro{color:#9AA0A6}
+.mday.has{background:#D2E3FC;color:#174EA6;font-weight:500}
+.mday.hoy{box-shadow:inset 0 0 0 1px var(--p)}
+.mday.sel{background:var(--p);color:#fff}
+.ib{width:36px;height:36px;border-radius:50%;cursor:pointer;background:none;border:0;font-size:16px}.ib:hover{background:var(--act)}
+.ov{position:fixed;inset:0;background:rgba(32,33,36,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal{background:#fff;border-radius:24px;max-width:440px;width:100%;max-height:90vh;overflow:auto;padding:24px}
+.chip{border-radius:999px;padding:2px 10px;font-size:12px;background:var(--act);color:var(--p);white-space:nowrap}
+.chip.g{background:#E6F4EA;color:#137333}.chip.x{background:#FCE8E6;color:#C5221F}.chip.w{background:#FEF7E0;color:#B06000}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;box-shadow:0 -2px 8px rgba(60,64,67,.25);padding:12px 16px;z-index:40}
+.kpi{background:var(--bg);border-radius:16px;padding:14px 16px}
+.kpi b{display:block;font-size:26px;font-weight:500}
+#toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#323232;color:#fff;border-radius:8px;padding:10px 16px;z-index:60;max-width:90%;display:none}
+.stk th{position:sticky;top:0;background:#fff}
+</style>
+</head>
+<body>
+<header class="bg-white" style="border-bottom:1px solid var(--b)">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
+    <div class="flex items-center gap-3 mr-auto">
+      <div class="day" style="background:var(--p);color:#fff;width:40px;height:40px;font-weight:500" aria-hidden="true">P</div>
+      <div><h1 class="leading-tight">Centro de Pilates</h1><div class="t2 sm">Sistema de reservas y gestión de clases</div></div>
+    </div>
+    <nav class="flex gap-1" aria-label="Vista">
+      <button class="tab" id="tabC" onclick="go('cliente')">Cliente</button>
+      <button class="tab" id="tabA" onclick="go('admin')">Acceso Admin</button>
+    </nav>
+    <div id="user" class="flex items-center gap-2"></div>
+  </div>
+</header>
+<div id="aviso"></div>
+<main id="app" class="max-w-6xl mx-auto px-4 py-5 pb-28"></main>
+<div id="toast" role="status"></div>
+<div id="modal"></div>
+<div id="modal2"></div>
+
+<script>
+'use strict';
+const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const CATS = ['Grupal', 'Personalizada'];
+const S = {
+  cli: null, admin: false, clave: '', view: 'cliente', apacks: [],
+  week: mon(new Date()), dia: new Date(), mes: new Date(), slots: [],
+  sel: new Map(), dash: null, ag: [], authTab: 'in', actEmail: null, actNom: '',
+  atab: 'agenda', disp: null, dispExc: false, regla: 'semanal', cls: [], selA: new Map(),
+  asig: '', selSlotsClase: new Set(), tipoClaseAsig: '', modoClase: false, tiposClases: [], fAg: 'todos',
+  rep: { desde: '', hasta: '', data: null, pago: 'todos', q: '' }
+};
+S.dia = new Date(S.dia.getFullYear(), S.dia.getMonth(), S.dia.getDate());
+S.mes = new Date(S.dia.getFullYear(), S.dia.getMonth(), 1);
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = n => '$' + Number(n || 0).toLocaleString('es-AR');
+
+/* ---------- Fechas ---------- */
+function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function add(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function mon(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+function pd(f) { return new Date(f + 'T00:00:00'); }
+function longDate(f) { return pd(f).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }); }
+function shortDate(f) { return f ? pd(f).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'; }
+function weekLabel() { const o = { day: 'numeric', month: 'long' }; return S.week.toLocaleDateString('es-AR', o) + ' – ' + add(S.week, 6).toLocaleDateString('es-AR', o); }
+function t12(h) { const [a, b] = h.split(':').map(Number); return (a % 12 || 12) + ':' + String(b).padStart(2, '0') + (a < 12 ? 'am' : 'pm'); }
+
+/* ---------- Backend ---------- */
+function api(fn, ...a) { return new Promise((ok, ko) => google.script.run.withSuccessHandler(ok).withFailureHandler(ko)[fn](...a)); }
+async function call(fn, ...a) {
+  try { const r = await api(fn, ...a); if (r && r.ok === false) toast(r.msg || 'No se pudo completar la acción.'); return r; }
+  catch (e) { toast('Error: ' + (e.message || e)); return { ok: false }; }
+}
+let tt;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(tt); tt = setTimeout(() => t.style.display = 'none', 5000); }
+function closeModal() { $('#modal').innerHTML = ''; }
+function openModal(h, ancho) { $('#modal').innerHTML = '<div class="ov" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog" aria-modal="true"' + (ancho ? ' style="max-width:' + ancho + 'px"' : '') + '>' + h + '</div></div>'; }
+function confirmar(titulo, msg, ok) {
+  return new Promise(res => {
+    window.__cf = v => { $('#modal2').innerHTML = ''; res(v); };
+    $('#modal2').innerHTML = '<div class="ov" style="z-index:70"><div class="modal" role="alertdialog" aria-modal="true" style="max-width:400px"><h2 class="mb-2">' + esc(titulo) + '</h2><p class="t2 mb-4">' + esc(msg) + '</p><div class="flex gap-2 justify-end"><button class="btn o" onclick="__cf(false)">Cancelar</button><button class="btn r" onclick="__cf(true)">' + esc(ok || 'Confirmar') + '</button></div></div></div>';
+  });
+}
+function field(id, l, t, ac) {
+  const pw = t === 'password';
+  return '<div><label class="sm t2" for="' + id + '">' + l + '</label><div style="position:relative"><input class="inp" id="' + id + '" type="' + (t || 'text') + '" placeholder=" " autocomplete="' + (ac || 'off') + '"' + (pw ? ' style="padding-right:76px"' : '') + '>' +
+    (pw ? '<button type="button" aria-label="Mostrar contraseña" aria-pressed="false" onclick="verPass(\'' + id + '\',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--p);font-weight:500;font-size:13px;cursor:pointer">Ver</button>' : '') +
+    '</div></div>';
+}
+
+function verPass(id, b) {
+  const i = document.getElementById(id), ver = i.type === 'password';
+  i.type = ver ? 'text' : 'password';
+  b.textContent = ver ? 'Ocultar' : 'Ver';
+  b.setAttribute('aria-label', ver ? 'Ocultar contraseña' : 'Mostrar contraseña');
+  b.setAttribute('aria-pressed', ver ? 'true' : 'false');
+}
+const pagoChip = p => '<span class="chip ' + (p === 'Pagado' ? 'g' : p === 'Pendiente' ? 'w' : p === 'Cancelado' ? 'x' : '') + '">' + esc(p) + '</span>';
+const optsPago = sel => ['Pagado', 'Pendiente', 'Cancelado'].map(p => '<option' + (p === sel ? ' selected' : '') + '>' + p + '</option>').join('');
+
+/* ---------- Navegación ---------- */
+function go(v) { S.view = v; render(); }
+function renderHeader() {
+  $('#tabC').className = 'tab' + (S.view === 'cliente' ? ' on' : '');
+  $('#tabA').className = 'tab' + (S.view === 'admin' ? ' on' : '');
+  let h = '';
+  if (S.cli && S.dash && S.view === 'cliente') h = '<span>' + esc(S.cli.nombre) + '</span><button class="btn o" onclick="logout()">Salir</button>';
+  else if (S.admin && S.view === 'admin') h = '<span>Administrador</span><button class="btn o" onclick="logout()">Salir</button>';
+  $('#user').innerHTML = h;
+}
+function logout() { S.cli = null; S.admin = false; S.clave = ''; S.dash = null; S.sel.clear(); S.selA.clear(); S.selSlotsClase.clear(); S.asig = ''; S.modoClase = false; S.tipoClaseAsig = ''; render(); }
+async function render() {
+  renderHeader();
+  if (S.view === 'cliente') { if (!S.cli) authView(); else await renderCliente(); }
+  else await renderAdmin();
+  renderHeader();
+}
+
+/* ---------- Cliente: acceso ---------- */
+function authView() {
+  const t = S.authTab, tb = (k, l) => '<button class="tab ' + (t === k ? 'on' : '') + '" onclick="S.authTab=\'' + k + '\';S.actEmail=null;authView()">' + l + '</button>';
+  let b = '';
+  if (t === 'in') b = field('le', 'Dirección de correo electrónico', 'email', 'email') + field('lp', 'Contraseña', 'password', 'current-password') + '<button class="btn" onclick="doLogin()">Ingresar</button>';
+  else if (!S.actEmail) b = '<p class="t2">Ingresá el correo con el que el centro te dio de alta.</p>' + field('ae', 'Dirección de correo electrónico', 'email', 'email') + '<button class="btn" onclick="doVerif()">Continuar</button>';
+  else b = '<p class="t2">Hola' + (S.actNom ? ', ' + esc(S.actNom) : '') + '. Creá tu contraseña para activar la cuenta.</p>' + field('ap1', 'Nueva contraseña (mínimo 6 caracteres)', 'password', 'new-password') + field('ap2', 'Confirmar contraseña', 'password', 'new-password') + '<button class="btn" onclick="doActivar()">Activar y entrar</button>';
+  $('#app').innerHTML = '<div class="card p-6 max-w-md mx-auto"><div class="flex flex-wrap gap-1 mb-4">' + tb('in', 'Ingresar') + tb('act', 'Activar mi cuenta') + '</div><div class="grid gap-3">' + b + '</div></div>';
+}
+async function doLogin() { const r = await call('loginCliente', $('#le').value, $('#lp').value); if (r && r.ok) { S.cli = r.cliente; render(); } }
+async function doVerif() { const e = $('#ae').value; const r = await call('verificarPreAlta', e); if (r && r.ok) { S.actEmail = e; S.actNom = r.nombre; authView(); } }
+async function doActivar() {
+  const r = await call('activarCuentaCliente', S.actEmail, $('#ap1').value, $('#ap2').value);
+  if (r && r.ok) { S.cli = r.cliente; S.actEmail = null; toast('Cuenta activada. ¡Bienvenido/a!'); render(); }
+}
+
+/* ---------- Mini-calendario (cliente y admin) ---------- */
+function gridRange() { const f = new Date(S.mes.getFullYear(), S.mes.getMonth(), 1), a = add(f, -f.getDay()); return [a, add(a, 41)]; }
+function drawMini(adm) {
+  const [a] = gridRange(), hoy = iso(new Date()), ds = iso(S.dia), p = adm ? 'A' : '';
+  const dis = new Set((adm ? S.ag : S.slots.filter(s => !s.completa && !s.pasada)).map(s => s.fecha));
+  let c = '';
+  for (let i = 0; i < 42; i++) {
+    const d = add(a, i), f = iso(d), delMes = d.getMonth() === S.mes.getMonth();
+    c += '<button class="mday' + (f === ds ? ' sel' : (delMes && dis.has(f)) ? ' has' : '') + (!delMes ? ' otro' : '') + (f === hoy ? ' hoy' : '') + '" aria-label="' + esc(longDate(f)) + '" onclick="pickDay' + p + '(\'' + f + '\')">' + d.getDate() + '</button>';
+  }
+  return '<div class="flex items-center justify-between mb-2"><span style="font-weight:500">' + (t => t.charAt(0).toUpperCase() + t.slice(1))(S.mes.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })) + '</span><span><button class="ib" aria-label="Mes anterior" onclick="moveMonth' + p + '(-1)">‹</button><button class="ib" aria-label="Mes siguiente" onclick="moveMonth' + p + '(1)">›</button></span></div>' +
+    '<div class="grid grid-cols-7 gap-y-1 justify-items-center text-center sm t2 mb-1">' + ['D', 'L', 'M', 'X', 'J', 'V', 'S'].map(x => '<span>' + x + '</span>').join('') + '</div><div class="grid grid-cols-7 gap-y-1 justify-items-center">' + c + '</div>';
+}
+
+/* ---------- Cliente: panel ---------- */
+async function loadSlots() {
+  const [a, b] = gridRange(), we = add(S.week, 6);
+  const s = await call('getClasesDisponibles', iso(a < S.week ? a : S.week), iso(b > we ? b : we));
+  S.slots = Array.isArray(s) ? s : [];
+}
+async function renderCliente() {
+  $('#app').innerHTML = '<p class="t2">Cargando…</p>';
+  const d = await call('getDashboardCliente', S.cli.id);
+  if (!d || !d.ok) { logout(); return; }
+  S.dash = d;
+  await loadSlots();
+  const stat = (n, l, c) => '<div class="card p-4"><div class="t2 sm">' + l + '</div><div style="font-size:28px;font-weight:500;color:' + (c || 'var(--t)') + '">' + n + '</div></div>';
+  $('#app').innerHTML = '<div class="mb-4"><h2>Hola, ' + esc(S.cli.nombre) + '</h2><div class="t2">Plan actual: ' + esc(d.pack) + '</div></div>' +
+    '<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">' + stat(d.contratadas, 'Clases contratadas') + stat(d.agendadas, 'Clases agendadas') + stat(d.restantes, 'Clases restantes por agendar', 'var(--p)') + stat(d.asistidas, 'Clases asistidas') + '</div>' +
+    packsInfo(d) + '<section class="card p-5 mb-5" id="agenda"></section><section class="card p-5" id="mias"></section><div id="barwrap"></div>';
+  drawAgenda(); drawMias(); updateBar();
+}
+
+function packsInfo(d) {
+  const hoy = iso(new Date());
+  const l = (d.packs || []).map(p => '<div class="flex flex-wrap items-center gap-2 py-1"><span class="mr-auto"><b style="font-weight:500">' + esc(p.nombre) + '</b><span class="t2 sm"> · ' + ((p.cats || []).length ? p.cats.join(', ') : 'todas las clases') + '</span></span><span class="t2 sm">' + p.saldo + (p.saldo === 1 ? ' clase ' + (p.vencido ? '- venció' : '- vence') : ' clases ' + (p.vencido ? 'vencieron' : 'vencen')) + ' el ' + shortDate(p.vence) + '</span><span class="chip ' + (p.vencido ? 'x' : 'g') + '">' + (p.vencido ? 'Vencido' : 'Vigente') + '</span></div>').join('');
+  const av = d.vencidas > 0 ? '<p class="sm mb-2" style="color:#B06000">Tenés ' + d.vencidas + ' clases vencidas. Consultá con el centro para usarlas.</p>' : '';
+  return (l || av) ? '<section class="card p-5 mb-5"><h3 class="mb-2">Mis packs</h3>' + av + l + '</section>' : '';
+}
+
+
+/* ¿Alguno de los packs vigentes del cliente habilita la categoría de esta clase? */
+function permitido(s) {
+  const l = (S.dash.packs || []).filter(p => !p.vencido);
+  return !l.length || l.some(p => !(p.cats || []).length || p.cats.indexOf(s.categoria) >= 0);
+}
+
+function drawAgenda() {
+  const mine = new Set(S.dash.reservas.map(r => r.idClase)), hoy = iso(new Date());
+  let cols = '';
+  for (let i = 0; i < 7; i++) {
+    const dt = add(S.week, i), f = iso(dt), sl = S.slots.filter(s => s.fecha === f);
+    cols += '<div style="min-width:100px"><div class="text-center mb-2"><div class="t2 sm">' + DIAS[i].toUpperCase() + '</div><div class="day ' + (f === hoy ? 'today' : '') + '" style="font-size:16px">' + dt.getDate() + '</div></div>' +
+      (sl.length ? sl.map(s => {
+        const lbl = '<span>' + t12(s.inicio) + '</span><small>' + (s.completa ? 'COMPLETA (' + s.ocupados + '/' + s.cupo + ')' : esc(s.nombre) + ' · ' + s.ocupados + '/' + s.cupo) + '</small>';
+        if (mine.has(s.idClase)) return '<div class="slot mine">' + lbl.replace('<small>', '<small>Reservada · ') + '</div>';
+        if (!permitido(s)) return '<div class="slot off" aria-disabled="true"><span>' + t12(s.inicio) + '</span><small>' + esc(s.nombre) + ' · no incluida en tu pack</small></div>';
+        if (s.completa || s.pasada) return '<div class="slot off ' + (s.completa ? 'full' : '') + '" aria-disabled="true">' + lbl + '</div>';
+        return '<label class="slot"><input type="checkbox" ' + (S.sel.has(s.idClase) ? 'checked' : '') + ' onchange="tog(this,\'' + s.idClase + '\')">' + lbl + '</label>';
+      }).join('') : '<div class="t2 text-center">—</div>') + '</div>';
+  }
+  $('#agenda').innerHTML = '<div class="flex flex-wrap items-center gap-2 mb-4"><h3 class="mr-auto">Seleccioná una hora para tu clase</h3><button class="btn o md:hidden" onclick="$(\'#mini\').classList.toggle(\'hidden\')">Calendario</button><span class="t2 sm">Hora de Buenos Aires</span></div>' +
+    '<div class="flex flex-col md:flex-row gap-6"><aside id="mini" class="hidden md:block md:w-64 shrink-0">' + drawMini() + '</aside><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-3"><button class="ib" aria-label="Semana anterior" onclick="moveWeek(-7)">‹</button><span class="mr-auto" style="font-weight:500">' + weekLabel() + '</span><button class="ib" aria-label="Semana siguiente" onclick="moveWeek(7)">›</button></div><p class="t2 sm mb-3">Tocá los horarios que quieras y agendalos juntos. "Repetir en el mes" suma el mismo día y hora de las próximas semanas.</p><div class="overflow-x-auto"><div class="grid grid-cols-7 gap-2" style="min-width:720px">' + cols + '</div></div></div></div>';
+}
+async function pickDay(f) { S.dia = pd(f); S.week = mon(S.dia); S.mes = new Date(S.dia.getFullYear(), S.dia.getMonth(), 1); await loadSlots(); drawAgenda(); }
+async function moveMonth(n) { S.mes = new Date(S.mes.getFullYear(), S.mes.getMonth() + n, 1); await loadSlots(); drawAgenda(); }
+async function moveWeek(n) { S.week = add(S.week, n); S.dia = S.week; S.mes = new Date(S.week.getFullYear(), S.week.getMonth(), 1); await loadSlots(); drawAgenda(); }
+function tog(el, idClase) {
+  const s = S.slots.find(x => x.idClase === idClase);
+  if (el.checked && s) S.sel.set(idClase, { idClase: idClase, fecha: s.fecha, dia: s.dia, inicio: s.inicio }); else S.sel.delete(idClase);
+  updateBar();
+}
+function updateBar() {
+  const n = S.sel.size;
+  $('#barwrap').innerHTML = n ? '<div class="bar"><div class="max-w-6xl mx-auto flex flex-wrap items-center gap-2 justify-between"><span class="t2">Restantes: ' + S.dash.restantes + ' · Seleccionadas: ' + n + '</span><div class="flex flex-wrap gap-2"><button class="btn o" onclick="clearSel()">Limpiar</button><button class="btn o" onclick="repeatMonth()">Repetir en el mes</button><button class="btn" onclick="book()">Agendar ' + n + (n === 1 ? ' clase seleccionada' : ' clases seleccionadas') + ' de una vez</button></div></div></div>' : '';
+}
+function clearSel() { S.sel.clear(); drawAgenda(); updateBar(); }
+async function repeatMonth() {
+  const sel = [...S.sel.values()], quiero = new Set(sel.map(v => v.dia + '|' + v.inicio));
+  const ini = sel.map(v => v.fecha).sort()[0];
+  const enPlazo = f => (S.dash.packs || []).some(p => !p.vencido && f >= p.desde && f <= (p.vence || iso(add(pd(ini), S.dash.vigenciaDias))));
+  const all = await call('getClasesDisponibles', iso(S.week), iso(add(S.week, 27)));
+  const mine = new Set(S.dash.reservas.map(r => r.idClase));
+  let n = 0;
+  (Array.isArray(all) ? all : []).forEach(s => {
+    if (ini && quiero.has(s.dia + '|' + s.inicio) && !s.completa && !s.pasada && !mine.has(s.idClase) && !S.sel.has(s.idClase) && S.sel.size < S.dash.restantes && enPlazo(s.fecha) && permitido(s)) { S.sel.set(s.idClase, { idClase: s.idClase, fecha: s.fecha, dia: s.dia, inicio: s.inicio }); n++; }
+  });
+  toast(n ? 'Se sumaron ' + n + ' clases dentro del plazo de tu pack.' : 'No hay más horarios libres dentro del plazo o alcanzaste tu saldo.');
+  drawAgenda(); updateBar();
+}
+async function book() {
+  if (S.sel.size > S.dash.restantes) { toast('Tenés ' + S.dash.restantes + ' clases restantes y elegiste ' + S.sel.size + '.'); return; }
+  const r = await call('crearReservasMasivas', S.cli.id, [...S.sel.values()]);
+  if (!r || !r.ok) { await render(); return; }
+  S.sel.clear();
+  openModal('<div class="text-center"><div class="day mx-auto mb-3" style="width:56px;height:56px;border:3px solid var(--p);color:var(--p);font-size:28px" aria-hidden="true">✓</div><h2>Reserva confirmada</h2><p class="t2 mt-1">Tus clases quedaron agendadas. Te quedan ' + r.restantes + '.</p></div><div class="mt-4 p-4" style="background:var(--act);border-radius:16px">' + r.creadas.map(c => '<div class="mb-1"><b>' + esc(longDate(c.fecha)) + '</b> · ' + t12(c.inicio) + ' · ' + esc(c.nombre) + '</div>').join('') + '</div><div class="text-center mt-4"><button class="btn" onclick="closeModal()">Listo</button></div>');
+  await render();
+}
+function drawMias() {
+  const l = S.dash.reservas;
+  const est = r => r.asistencia === 'Asistio' ? '<span class="chip g">Asistió</span>' : r.asistencia === 'Falto' ? '<span class="chip x">Faltó</span>' : '<span class="chip">Agendada</span>';
+  $('#mias').innerHTML = '<h3 class="mb-3">Mis clases reservadas</h3>' + (l.length ? l.map(r => '<div class="flex flex-wrap items-center gap-3 py-3" style="border-top:1px solid var(--b)"><div class="mr-auto"><div style="font-weight:500">' + esc(longDate(r.fecha)) + ' · ' + t12(r.inicio) + '</div><div class="t2 sm">' + esc(r.nombre) + '</div></div>' + est(r) + (r.asistencia === 'Pendiente' && !r.pasada ? '<button class="btn r" onclick="cancelar(\'' + r.idReserva + '\')">Cancelar</button>' : '') + '</div>').join('') : '<p class="t2">Todavía no reservaste clases. Elegí horarios en la agenda.</p>');
+}
+async function cancelar(id) {
+  if (!(await confirmar('Cancelar reserva', 'Recuperás la clase en tu saldo.', 'Sí, cancelar'))) return;
+  const r = await call('cancelarReserva', id, S.cli.id);
+  if (r && r.ok) { toast(r.msg); render(); }
+}
+
+/* ---------- Admin ---------- */
+function adminLogin() {
+  $('#app').innerHTML = '<div class="card p-6 max-w-md mx-auto"><h2 class="mb-3">Acceso administrador</h2><div class="grid gap-3">' + field('au', 'Usuario', 'text', 'username') + field('ap', 'Contraseña', 'password', 'current-password') + '<button class="btn" onclick="doAdmin()">Ingresar</button></div></div>';
+}
+async function doAdmin() { const p = $('#ap').value, r = await call('loginAdmin', $('#au').value, p); if (r && r.ok) { S.admin = true; S.clave = p; render(); } }
+async function renderAdmin() {
+  if (!S.admin) { adminLogin(); return; }
+  const tabs = [['agenda', 'Agenda'], ['disp', 'Disponibilidad'], ['tipos', 'Tipos de Clase'], ['clientes', 'Clientes'], ['packs', 'Servicios y precios']];
+  $('#app').innerHTML = '<div class="flex flex-wrap gap-1 mb-4">' + tabs.map(t => '<button class="tab ' + (S.atab === t[0] ? 'on' : '') + '" onclick="S.atab=\'' + t[0] + '\';render()">' + t[1] + '</button>').join('') + '</div><section class="card p-5" id="adm"><p class="t2">Cargando…</p></section>' + (S.atab === 'agenda' ? '<section class="card p-5 mt-5" id="rep"><p class="t2">Cargando reporte…</p></section>' : '') + '<div id="barwrap"></div>';
+  try {
+    if (S.atab === 'tipos') { await loadTiposClases(); drawTiposClases(); }
+    else if (S.atab === 'packs') { const p = await call('getPacksYServicios', true, S.clave); S.apacks = Array.isArray(p) ? p : []; drawPacks(); }
+    else if (S.atab === 'agenda') { await Promise.all([loadAg(), loadClientes(), loadTiposClases()]); drawAgenda2(); await initReporte(); }
+    else if (S.atab === 'disp') { await Promise.all([loadDisp(), loadAg()]); drawDisp(); }
+    else { await loadClientes(); drawClientes(); }
+  } catch (e) {
+    console.error(e);
+    $('#adm').innerHTML = '<p class="t2" style="color:#C5221F">Error al cargar la sección: ' + esc(e.message || e) + '</p>';
+  }
+}
+
+/* ---------- Tipos de clase ---------- */
+async function loadTiposClases() { const r = await call('getTiposClases', S.clave); S.tiposClases = (r && r.ok) ? r.tipos : []; }
+
+function drawTiposClases() {
+  const list = S.tiposClases || [];
+  const rowsHtml = list.length ? list.map(t => '<tr style="border-top:1px solid var(--b)"><td class="py-2" style="font-weight:500">' + esc(t.nombre) + '</td><td><span class="chip ' + (t.categoria === 'Personalizada' ? 'w' : '') + '">' + esc(t.categoria) + '</span></td><td><span class="chip ' + (t.cupo <= 2 ? 'w' : 'g') + '">' + t.cupo + ' alumnos</span></td><td class="text-right"><button class="ib" title="Editar" onclick="modalFormTipoClase(\'' + t.id + '\')">✏️</button><button class="ib" title="Eliminar" onclick="borrarTipoClase(\'' + t.id + '\')">🗑️</button></td></tr>').join('') : '<tr><td colspan="4" class="t2 py-4 text-center">No hay clases configuradas.</td></tr>';
+  $('#adm').innerHTML = '<div class="flex flex-wrap items-center gap-2 mb-2"><h3 class="mr-auto">Mis tipos de clase</h3><button class="btn" onclick="modalFormTipoClase()">+ Nueva clase</button></div><p class="t2 sm mb-4">Cada clase tiene una categoría (Grupal o Personalizada) y un cupo por defecto. La categoría define qué packs la habilitan.</p><div class="overflow-x-auto"><table class="w-full text-left" style="min-width:520px"><thead><tr class="t2 sm"><th class="pb-2">Nombre de la clase</th><th class="pb-2">Categoría</th><th class="pb-2">Cupo por defecto</th><th class="pb-2 text-right">Acciones</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
+}
+function modalFormTipoClase(id) {
+  const t = id ? S.tiposClases.find(x => x.id === id) : null, cat = t ? t.categoria : 'Grupal';
+  openModal('<h3 class="mb-3">' + (t ? 'Editar clase' : 'Crear nueva clase') + '</h3><div class="grid gap-3"><div><label class="t2 sm" for="tc_nom">Nombre de la clase</label><input id="tc_nom" class="inp" value="' + esc(t ? t.nombre : '') + '" placeholder="Ej: Pilates Reformer"></div><div><label class="t2 sm" for="tc_cat">Categoría (define qué packs la habilitan)</label><select id="tc_cat" class="inp">' + CATS.map(c => '<option' + (c === cat ? ' selected' : '') + '>' + c + '</option>').join('') + '</select></div><div><label class="t2 sm" for="tc_cupo">Cupo máximo por defecto</label><input id="tc_cupo" type="number" min="1" max="20" class="inp" value="' + (t ? t.cupo : 6) + '"></div><div class="flex gap-2 justify-end mt-2"><button class="btn o" onclick="closeModal()">Cancelar</button><button class="btn" onclick="guardarTipoClaseForm(\'' + (id || '') + '\')">Guardar</button></div></div>');
+}
+async function guardarTipoClaseForm(id) {
+  const nom = $('#tc_nom').value.trim(), cupo = parseInt($('#tc_cupo').value), cat = $('#tc_cat').value;
+  if (!nom || !cupo) { toast('Completá todos los campos.'); return; }
+  const r = await call('guardarTipoClase', id || null, nom, cupo, S.clave, cat);
+  if (r && r.ok) { closeModal(); toast(r.msg); await loadTiposClases(); drawTiposClases(); }
+}
+
+async function borrarTipoClase(id) {
+  if (!(await confirmar('Eliminar tipo de clase', 'Si está en uso, se desactiva y se conserva el historial.', 'Eliminar'))) return;
+  const r = await call('eliminarTipoClase', id, S.clave);
+  if (r && r.ok) { toast(r.msg); await loadTiposClases(); drawTiposClases(); }
+}
+
+/* ---------- Agenda admin ---------- */
+async function loadAg() {
+  const [a, b] = gridRange(), we = add(S.week, 6);
+  const r = await call('getAgendaAdmin', S.clave, iso(a < S.week ? a : S.week), iso(b > we ? b : we));
+  S.ag = (r && r.slots) || [];
+}
+function redrawAdm() { if (S.atab === 'disp') drawDisp(); else drawAgenda2(); }
+async function reloadDataAdm() { if (S.atab === 'disp') { await Promise.all([loadDisp(), loadAg()]); drawDisp(); } else { await loadAg(); drawAgenda2(); } }
+async function pickDayA(f) { S.dia = pd(f); S.week = mon(S.dia); S.mes = new Date(S.dia.getFullYear(), S.dia.getMonth(), 1); await reloadDataAdm(); }
+async function moveMonthA(n) { S.mes = new Date(S.mes.getFullYear(), S.mes.getMonth() + n, 1); await loadAg(); redrawAdm(); }
+async function moveAdminWeek(n) { S.week = add(S.week, n); S.dia = S.week; S.mes = new Date(S.week.getFullYear(), S.week.getMonth(), 1); await loadAg(); drawAgenda2(); }
+function setAsig(v) { S.asig = v; S.modoClase = false; S.tipoClaseAsig = ''; S.selSlotsClase.clear(); S.selA.clear(); drawAgenda2(); }
+
+function drawAgenda2() {
+  const hoy = iso(new Date()), cli = S.cls.find(c => c.id === S.asig);
+  const filtrar = s => S.fAg === 'completos' ? s.completa : S.fAg === 'vacantes' ? !s.completa : S.fAg === 'con_alumnos' ? s.ocupados > 0 : S.fAg === 'vacios' ? s.ocupados === 0 : true;
+  let cols = '';
+  for (let i = 0; i < 7; i++) {
+    const dt = add(S.week, i), f = iso(dt);
+    cols += '<div style="min-width:104px"><div class="text-center mb-2"><div class="t2 sm">' + DIAS[i] + '</div><div class="day ' + (f === hoy ? 'today' : '') + '">' + dt.getDate() + '</div></div>' +
+      (S.ag.filter(s => s.fecha === f && filtrar(s)).map(s => {
+        const lbl = '<span>' + esc(s.inicio) + ' · ' + esc(s.nombre) + '</span><small>' + (s.completa ? 'COMPLETA ' : '') + '(' + s.ocupados + '/' + s.cupo + ')</small>';
+        if (S.asig) {
+          if (s.participantes.some(p => p.idCliente === S.asig)) return '<div class="slot mine">' + lbl.replace('<small>', '<small>Ya asignado ') + '</div>';
+          if (s.completa || s.pasada) return '<div class="slot off ' + (s.completa ? 'full' : '') + '" aria-disabled="true">' + lbl + '</div>';
+          return '<label class="slot"><input type="checkbox" ' + (S.selA.has(s.idClase) ? 'checked' : '') + ' onchange="togA(this,\'' + s.idClase + '\')">' + lbl + '</label>';
+        }
+        return '<button class="slot w-full" onclick="openSlot(\'' + s.idClase + '\')">' + lbl + '</button>';
+      }).join('') || '<div class="t2 text-center sm py-4">—</div>') + '</div>';
+  }
+  const optsF = [['todos', 'Todos los turnos'], ['con_alumnos', 'Con alumnos inscriptos'], ['vacantes', 'Con lugares disponibles'], ['completos', 'Cupo completo'], ['vacios', 'Sin alumnos']].map(o => '<option value="' + o[0] + '"' + (S.fAg === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('');
+ 
+  const optsC = '<option value="">Asignar turnos a un cliente…</option>' + S.cls.filter(c => c.estado !== 'Inactivo').map(c => '<option value="' + esc(c.id) + '"' + (c.id === S.asig ? ' selected' : '') + '>' + esc(c.nombre) + ' (' + c.creditos + ' clases)</option>').join('');
+  $('#adm').innerHTML = '<div class="flex flex-wrap items-center gap-2 mb-4"><h3 class="mr-auto">Agenda global</h3>' +
+    '<select class="inp" style="max-width:190px;width:auto" aria-label="Filtrar turnos" onchange="S.fAg=this.value;drawAgenda2()">' + optsF + '</select>'  +
+    '<select class="inp" style="max-width:260px;width:auto" aria-label="Asignar turnos a un cliente" onchange="setAsig(this.value)">' + optsC + '</select>' +
+    '<button class="btn o md:hidden" onclick="$(\'#mini\').classList.toggle(\'hidden\')">Calendario</button></div>'+
+    (S.asig ? '<p class="t2 sm mb-3">Marcá los turnos para ' + esc(cli ? cli.nombre : '') + ' y confirmá en la barra inferior.</p>' : '') +
+    '<div class="flex flex-col md:flex-row gap-6"><aside id="mini" class="hidden md:block md:w-64 shrink-0">' + drawMini(true) + '</aside><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-3"><button class="ib" aria-label="Semana anterior" onclick="moveAdminWeek(-7)">‹</button><span class="mr-auto" style="font-weight:500">' + weekLabel() + '</span><button class="ib" aria-label="Semana siguiente" onclick="moveAdminWeek(7)">›</button></div><div class="overflow-x-auto"><div class="grid grid-cols-7 gap-2" style="min-width:760px">' + cols + '</div></div></div></div>';
+  updateBarA();
+}
+function togA(el, idClase) {
+  const s = S.ag.find(x => x.idClase === idClase);
+  if (el.checked && s) S.selA.set(idClase, { idClase: idClase, fecha: s.fecha, dia: s.dia, inicio: s.inicio }); else S.selA.delete(idClase);
+  updateBarA();
+}
+function updateBarA() {
+  const n = S.selA.size, c = S.cls.find(x => x.id === S.asig);
+  $('#barwrap').innerHTML = (c && n) ? '<div class="bar"><div class="max-w-6xl mx-auto flex flex-wrap items-center gap-2 justify-between"><span class="t2">' + esc(c.nombre) + ' · Créditos: ' + c.creditos + (c.vencidas ? ' (+' + c.vencidas + ' vencidos)' : '') + ' · Seleccionados: ' + n + '</span><div class="flex flex-wrap gap-2"><button class="btn o" onclick="S.selA.clear();drawAgenda2()">Limpiar</button><button class="btn o" onclick="repeatMonthA()">Repetir en el mes</button><button class="btn" onclick="asignarA()">Asignar ' + n + (n === 1 ? ' turno' : ' turnos') + '</button></div></div></div>' : '';
+}
+async function repeatMonthA() {
+  const c = S.cls.find(x => x.id === S.asig);
+  if (!c) return;
+  const quiero = new Set([...S.selA.values()].map(v => v.dia + '|' + v.inicio));
+  const r = await call('getAgendaAdmin', S.clave, iso(S.week), iso(add(S.week, 27)));
+  let n = 0;
+  ((r && r.slots) || []).forEach(s => {
+    if (quiero.has(s.dia + '|' + s.inicio) && !s.completa && !s.pasada && !S.selA.has(s.idClase) && !s.participantes.some(p => p.idCliente === S.asig) && S.selA.size < c.creditos + (c.vencidas || 0)) { S.selA.set(s.idClase, { idClase: s.idClase, fecha: s.fecha, dia: s.dia, inicio: s.inicio }); n++; }
+  });
+  toast(n ? 'Se sumaron ' + n + ' turnos de las próximas 4 semanas.' : 'No hay más turnos libres para repetir o se alcanzó el saldo del cliente.');
+  drawAgenda2();
+}
+async function asignarA() {
+  if (!S.asig || !S.selA.size) return;
+  const r = await call('crearReservasAdmin', S.asig, [...S.selA.values()], S.clave);
+  if (!r || !r.ok) return;
+  toast('Se asignaron ' + r.creadas.length + ' turnos. Créditos restantes del cliente: ' + r.restantes + '.' + (r.fueraDePlazo ? ' ' + r.fueraDePlazo + ' quedaron fuera del plazo de 30 días del pack.' : ''));
+  S.selA.clear();
+  await Promise.all([loadAg(), loadClientes(), loadReporte()]);
+  drawAgenda2(); drawReporte();
+}
+
+/* ---------- Modal de turno ---------- */
+function openSlot(idClase) {
+  const s = S.ag.find(x => x.idClase === idClase);
+  if (!s) return;
+  const chip = a => a === 'Asistio' ? '<span class="chip g">Asistió</span>' : a === 'Falto' ? '<span class="chip x">Faltó</span>' : '<span class="chip">Pendiente</span>';
+  const q = (id, e) => 'asist(\'' + id + '\',\'' + e + '\',\'' + idClase + '\')';
+  const part = s.participantes.length ? s.participantes.map(p => '<div class="py-2" style="border-top:1px solid var(--b)"><div class="flex items-center gap-2 mb-2"><span class="mr-auto" style="font-weight:500">' + esc(p.cliente) + '</span>' + chip(p.asistencia) + '</div><div class="flex flex-wrap gap-2"><button class="btn o" onclick="' + q(p.idReserva, 'Asistio') + '">Asistió</button><button class="btn o" onclick="' + q(p.idReserva, 'Falto') + '">Falta</button><button class="btn r" onclick="desanotarAlumno(\'' + p.idReserva + '\',\'' + idClase + '\')">Cancelar reserva</button></div></div>').join('') : '<p class="t2 my-4">Sin inscriptos en este turno.</p>';
+  openModal('<div id="slotModalBody"><h2>' + esc(s.nombre) + '</h2><div class="t2 mb-3">' + esc(longDate(s.fecha)) + ' · ' + esc(s.inicio) + ' a ' + esc(s.fin) + ' · <b>' + s.ocupados + '/' + s.cupo + ' inscriptos</b></div>' + part +
+    '<div class="flex gap-2 justify-end pt-3 mt-3" style="border-top:1px solid var(--b)"><button class="btn o" onclick="formEditarSlot(\'' + idClase + '\')">✏️ Editar clase / cupo</button><button class="btn" onclick="closeModal()">Cerrar</button></div></div>');
+}
+function formEditarSlot(idClase) {
+  const s = S.ag.find(x => x.idClase === idClase);
+  if (!s) return;
+  const tipos = S.tiposClases.slice();
+  if (!tipos.some(t => t.id === s.idTipo)) tipos.unshift({ id: s.idTipo, nombre: s.nombre, cupo: s.cupo });
+  const opts = tipos.map(t => '<option value="' + esc(t.id) + '" data-cupo="' + t.cupo + '"' + (s.idTipo === t.id ? ' selected' : '') + '>' + esc(t.nombre) + ' (' + t.cupo + ' lugares)</option>').join('');
+  $('#slotModalBody').innerHTML = '<h3 class="mb-1">Editar nombre y cupo</h3><p class="t2 sm mb-3">Afecta únicamente al <b>' + esc(longDate(s.fecha)) + '</b> de ' + esc(s.inicio) + ' a ' + esc(s.fin) + '. Hoy hay ' + s.ocupados + ' inscriptos.</p><div class="grid gap-3 mb-4"><div><label class="t2 sm" for="es_tipo">Clase / disciplina</label><select id="es_tipo" class="inp" onchange="actualizarCupoAuto(this)">' + opts + '</select></div><div><label class="t2 sm" for="es_cupo">Cupo máximo</label><input id="es_cupo" type="number" min="1" max="20" class="inp" value="' + s.cupo + '"></div></div><div class="flex gap-2 justify-end pt-3" style="border-top:1px solid var(--b)"><button class="btn o" onclick="openSlot(\'' + idClase + '\')">Volver</button><button class="btn" onclick="guardarEdicionSlot(\'' + idClase + '\')">Guardar cambios</button></div>';
+}
+function actualizarCupoAuto(sel) { const o = sel.options[sel.selectedIndex], c = o && o.getAttribute('data-cupo'); if (c) $('#es_cupo').value = c; }
+async function guardarEdicionSlot(idClase) {
+  const tipo = $('#es_tipo').value, cupo = parseInt($('#es_cupo').value);
+  if (!tipo || isNaN(cupo) || cupo < 1) { toast('Ingresá una clase y un cupo válidos.'); return; }
+  const r = await call('editarClase', idClase, tipo, cupo, S.clave);
+  if (r && r.ok) { closeModal(); toast(r.msg); await loadAg(); drawAgenda2(); }
+}
+async function reloadAg(idClase) { await Promise.all([loadAg(), loadClientes()]); drawAgenda2(); openSlot(idClase); loadReporte().then(drawReporte); }
+async function asist(id, est, idClase) { const r = await call('marcarAsistencia', id, est, S.clave); if (r && r.ok) reloadAg(idClase); }
+async function desanotarAlumno(id, idClase) {
+  if (!(await confirmar('Cancelar reserva', 'Se cancela la reserva de este cliente y se le devuelve la clase.', 'Sí, cancelar'))) return;
+  const r = await call('cancelarReservaAdmin', id, S.clave);
+  if (r && r.ok) { toast(r.msg); reloadAg(idClase); }
+}
+
+/* ---------- Reporte (debajo de la agenda) ---------- */
+function rangoRapido(k) {
+  const h = new Date(), y = h.getFullYear(), m = h.getMonth();
+  if (k === 'mes') return [iso(new Date(y, m, 1)), iso(new Date(y, m + 1, 0))];
+  if (k === 'pasado') return [iso(new Date(y, m - 1, 1)), iso(new Date(y, m, 0))];
+  return [iso(add(h, -29)), iso(h)];
+}
+async function initReporte() { if (!S.rep.desde) { const r = rangoRapido('mes'); S.rep.desde = r[0]; S.rep.hasta = r[1]; } await loadReporte(); drawReporte(); }
+async function loadReporte() { const r = await call('getReporteAdmin', S.clave, S.rep.desde, S.rep.hasta); S.rep.data = (r && r.ok) ? r : null; }
+async function setRango(k) { const r = rangoRapido(k); S.rep.desde = r[0]; S.rep.hasta = r[1]; await loadReporte(); drawReporte(); }
+async function aplicarRango() {
+  const d = $('#rd').value, h = $('#rh').value;
+  if (!d || !h || d > h) { toast('Elegí un rango válido (Desde no puede ser posterior a Hasta).'); return; }
+  S.rep.desde = d; S.rep.hasta = h; await loadReporte(); drawReporte();
+}
+
+function drawReporte() {
+  const el = $('#rep');
+  if (!el) return;
+  const d = S.rep.data;
+  if (!d) { el.innerHTML = '<h3>Reporte</h3><p class="t2">No se pudo cargar el reporte.</p>'; return; }
+  const k = d.kpis, kp = (v, l, sub) => '<div class="kpi"><span class="t2 sm">' + l + '</span><b>' + v + '</b><span class="t2 sm">' + sub + '</span></div>';
+  const pct = p => p == null ? '<span class="t2">—</span>' : '<span class="chip ' + (p >= 70 ? 'g' : p >= 40 ? 'w' : 'x') + '">' + p + '%</span>';
+  const disc = (d.disciplinas || []).length ? d.disciplinas.map(x => '<tr style="border-top:1px solid var(--b)"><td class="py-2" style="font-weight:500">' + esc(x.nombre) + '</td><td>' + x.turnos + '</td><td>' + x.conAlumnos + '</td><td>' + x.ofrecidos + '</td><td>' + x.reservados + '</td><td>' + x.asistieron + '</td><td>' + pct(x.pct) + '</td></tr>').join('') : '<tr><td colspan="7" class="t2 py-3">Todavía no hay turnos dictados en este período.</td></tr>';
+  el.innerHTML = '<div class="flex flex-wrap items-center gap-2 mb-3"><h3 class="mr-auto">Reporte de gestión</h3><button class="btn o s" onclick="setRango(\'mes\')">Este mes</button><button class="btn o s" onclick="setRango(\'pasado\')">Mes pasado</button><button class="btn o s" onclick="setRango(\'30\')">Últimos 30 días</button></div>' +
+    '<div class="flex flex-wrap items-end gap-2 mb-4"><div><label class="sm t2" for="rd">Desde</label><input id="rd" type="date" class="inp" style="width:auto" value="' + esc(d.desde) + '"></div><div><label class="sm t2" for="rh">Hasta</label><input id="rh" type="date" class="inp" style="width:auto" value="' + esc(d.hasta) + '"></div><button class="btn" onclick="aplicarRango()">Aplicar</button></div>' +
+    '<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-2">' +
+    kp(k.ocupacion == null ? '—' : k.ocupacion + '%', 'Ocupación', k.reservados + ' de ' + k.ofrecidos + ' lugares, en turnos ya dictados') +
+    kp(k.turnos, 'Turnos del período', k.turnosConAlumnos + ' con alumnos · ' + k.dictados + ' ya dictados · ' + k.proximos + ' próximos') +
+    kp(k.asistieron, 'Asistencias marcadas', k.reservasProximas + ' reservas en turnos próximos') +
+    kp(money(k.cobrado), 'Ingreso cobrado', money(k.pendienteCobro) + ' pendiente de cobro') + '</div>' +
+    '<p class="t2 sm mb-5">Clientes activos: ' + k.clientesActivos + ' (' + k.clientesConReservas + ' con reservas en el período).</p>' +
+    '<h3 class="mb-1" style="font-size:15px">Rendimiento por disciplina</h3><p class="t2 sm mb-2">Solo turnos que ya empezaron. Ocupación = lugares reservados ÷ lugares ofrecidos.</p><div class="overflow-x-auto mb-5" style="border:1px solid var(--b);border-radius:12px;padding:0 12px"><table class="w-full text-left" style="min-width:640px"><thead class="t2 sm"><tr><th class="py-2">Disciplina</th><th>Turnos</th><th>Con alumnos</th><th>Lugares ofrecidos</th><th>Reservados</th><th>Asistieron</th><th>% ocupación</th></tr></thead><tbody>' + disc + '</tbody></table></div>' +
+    '<div class="flex flex-wrap items-center gap-2 mb-3"><h3 class="mr-auto" style="font-size:15px">Alumnos</h3><select id="rp" class="inp" style="max-width:190px;width:auto" aria-label="Filtrar por pago" onchange="S.rep.pago=this.value;drawRepRows()"><option value="todos">Todos los pagos</option><option value="Pagado">Pagaron</option><option value="Pendiente">Pago pendiente</option></select><input id="rq" class="inp" style="max-width:220px" placeholder="Buscar alumno" aria-label="Buscar alumno" oninput="S.rep.q=this.value;drawRepRows()"></div>' +
+    '<div class="overflow-x-auto"><table class="w-full text-left" style="min-width:960px"><thead class="t2 sm"><tr><th class="py-2">Alumno</th><th>Pack actual</th><th>Pago</th><th>Asistió</th><th>Faltó</th><th>Reservadas pendientes</th><th>Canceladas</th><th>Saldo actual</th></tr></thead><tbody id="repTb"></tbody></table></div><p class="t2 sm mt-2">Asistió, faltó, reservadas y canceladas corresponden a las clases del rango elegido. "Saldo actual" es lo que le queda hoy por agendar (más las vencidas). "(+N)" indica cuántos packs más tiene.</p>';
+  $('#rp').value = S.rep.pago; $('#rq').value = S.rep.q;
+  drawRepRows();
+}
+
+function drawRepRows() {
+  const q = S.rep.q.toLowerCase().trim(), p = S.rep.pago;
+  const l = S.rep.data.alumnos.filter(a => (p === 'todos' || a.pago === p) && (!q || a.nombre.toLowerCase().includes(q)));
+  $('#repTb').innerHTML = l.length ? l.map(a => {
+    const c = a.cancCliente + a.cancAdmin + a.cancSinDato;
+    return '<tr style="border-top:1px solid var(--b)"><td class="py-2" style="font-weight:500">' + esc(a.nombre) + '</td><td>' + esc(a.pack) + '</td><td>' + pagoChip(a.pago) + '</td><td>' + a.realizadas + '</td><td>' + a.faltas + '</td><td>' + a.reservadas + '</td><td>' + c + (c ? '<div class="t2 sm">Cliente ' + a.cancCliente + ' · Centro ' + a.cancAdmin + (a.cancSinDato ? ' · s/d ' + a.cancSinDato : '') + '</div>' : '') + '</td><td>' + a.restantes + (a.vencidas ? ' <span class="chip x">' + a.vencidas + ' vencidas</span>' : '') + '</td></tr>';
+  }).join('') : '<tr><td colspan="8" class="t2 py-4">No hay alumnos que coincidan con el filtro.</td></tr>';
+}
+
+/* ---------- Disponibilidad ---------- */
+async function loadDisp() {
+  const r = await call('getDisponibilidad', S.clave, iso(S.week));
+  S.disp = {};
+  for (let d = 1; d <= 7; d++) S.disp[d] = (r && r.dias && r.dias[d]) ? r.dias[d].map(x => ({ i: x.i, f: x.f })) : [];
+  S.dispExc = !!(r && r.tieneExcepcion);
+}
+function drawDisp() {
+  const rows = [];
+  for (let d = 1; d <= 7; d++) {
+    const l = S.disp[d], n = DIAS[d - 1];
+    if (!l.length) { rows.push('<div class="flex items-center gap-3 py-3" style="border-top:1px solid var(--b)"><span style="width:44px;font-weight:500">' + n + '</span><span class="t2 mr-auto">No disponible</span><button class="ib" aria-label="Activar ' + n + '" onclick="dAdd(' + d + ')">⊕</button></div>'); continue; }
+    l.forEach((r, k) => rows.push('<div class="flex flex-wrap items-center gap-2 py-2" style="border-top:' + (k ? '0' : '1px solid var(--b)') + '"><span style="width:44px;font-weight:500">' + (k ? '' : n) + '</span><input type="time" class="inp" style="width:130px" aria-label="Hora inicio" value="' + esc(r.i) + '" oninput="dSet(' + d + ',' + k + ',\'i\',this.value)"><span class="t2">–</span><input type="time" class="inp" style="width:130px" aria-label="Hora fin" value="' + esc(r.f) + '" oninput="dSet(' + d + ',' + k + ',\'f\',this.value)"><button class="ib" aria-label="Eliminar franja" onclick="dDel(' + d + ',' + k + ')">🗑</button>' + (k ? '' : '<button class="ib" aria-label="Agregar franja" onclick="dAdd(' + d + ')">⊕</button><button class="ib" aria-label="Copiar a todos" title="Copiar a lunes–viernes" onclick="dCopy(' + d + ')">📋</button>') + '</div>'));
+  }
+  $('#adm').innerHTML = '<h3>Disponibilidad general</h3><p class="t2 sm mb-3">Cada franja se divide en turnos de 1 hora.' + (S.dispExc ? ' <b>Esta semana tiene horarios especiales ("solo esta semana").</b>' : '') + '</p><div class="flex flex-col md:flex-row gap-6"><aside id="mini" class="hidden md:block md:w-64 shrink-0">' + drawMini(true) + '</aside><div class="flex-1 min-w-0"><div class="flex flex-wrap items-center gap-2 mb-3"><select id="regla" class="inp" style="max-width:320px;width:auto" aria-label="Regla de repetición" onchange="S.regla=this.value"><option value="semanal"' + (S.regla === 'semanal' ? ' selected' : '') + '>Repetir semanalmente</option><option value="semana"' + (S.regla === 'semana' ? ' selected' : '') + '>Solo esta semana (' + weekLabel() + ')</option></select><button class="btn o" onclick="moveDispWeek(-7)">‹ Semana</button><button class="btn o" onclick="moveDispWeek(7)">Semana ›</button><button class="btn o md:hidden" onclick="$(\'#mini\').classList.toggle(\'hidden\')">Calendario</button></div>' + rows.join('') + '<div class="mt-4"><button class="btn" onclick="dSave()">Guardar disponibilidad</button></div></div></div>';
+}
+async function moveDispWeek(n) { S.week = add(S.week, n); S.dia = S.week; S.mes = new Date(S.week.getFullYear(), S.week.getMonth(), 1); await Promise.all([loadDisp(), loadAg()]); drawDisp(); }
+function dSet(d, k, key, v) { if (S.disp[d][k]) S.disp[d][k][key] = v; }
+function dAdd(d) { const l = S.disp[d]; l.push(l.length ? { i: '16:00', f: '19:00' } : { i: '09:00', f: '11:00' }); drawDisp(); }
+function dDel(d, k) { S.disp[d].splice(k, 1); drawDisp(); }
+function dCopy(d) { const f = S.disp[d].map(x => ({ i: x.i, f: x.f })); for (let e = 1; e <= 5; e++) if (e !== d) S.disp[e] = f.map(x => ({ i: x.i, f: x.f })); toast('Franjas copiadas a lunes–viernes.'); drawDisp(); }
+async function dSave(confirmar) {
+  for (let d = 1; d <= 7; d++) for (const r of S.disp[d]) if (!r.i || !r.f || r.f <= r.i) { toast('Revisá ' + DIAS[d - 1] + ': la hora de fin debe ser posterior a la de inicio.'); return; }
+  const r = await call('guardarDisponibilidad', { regla: S.regla, semana: iso(S.week), dias: S.disp, confirmarAfectados: confirmar === true }, S.clave);
+  if (r && r.requiereConfirmacion) {
+    const li = (r.afectados || []).map(a => '<li class="mb-1"><b>' + esc(a.cliente) + '</b>: ' + esc(longDate(a.fecha)) + ' a las ' + esc(a.hora) + '</li>').join('');
+    openModal('<h2 class="mb-2" style="color:#C5221F">⚠️ Hay clientes inscriptos</h2><p class="t2 mb-3">' + esc(r.msg) + '</p><div class="p-3 mb-4" style="background:#FCE8E6;border-radius:12px;max-height:160px;overflow:auto"><ul style="list-style:disc;padding-left:18px">' + li + '</ul></div><div class="flex gap-2 justify-end"><button class="btn o" onclick="closeModal()">Cancelar cambio</button><button class="btn r" onclick="closeModal();dSave(true)">Sí, cancelar reservas y guardar</button></div>');
+    return;
+  }
+  if (r && r.ok) { toast(r.msg || 'Disponibilidad guardada.'); await Promise.all([loadDisp(), loadAg()]); drawDisp(); }
+}
+
+/* ---------- Servicios y precios ---------- */
+function drawPacks() {
+  const rows = S.apacks.concat([{ id: '', nombre: '', cantidad: '', precio: '', estado: 'Activo', cats: '' }]);
+  const optC = sel => '<option value="">Todas las categorías</option>' + CATS.map(c => '<option' + (sel === c ? ' selected' : '') + '>' + c + '</option>').join('');
+  $('#adm').innerHTML = '<h3 class="mb-1">Servicios y precios</h3><p class="t2 sm mb-3">"Clases que habilita" define a qué categoría de clase puede anotarse quien contrate el pack. Los cambios de precio no alteran contrataciones ya hechas.</p><div class="overflow-x-auto"><table class="w-full" style="min-width:860px"><thead><tr class="t2 sm text-left"><th>Servicio</th><th>Clases</th><th>Precio</th><th>Estado</th><th>Clases que habilita</th><th></th></tr></thead><tbody>' +
+    rows.map((p, i) => '<tr data-i="' + i + '"><td class="pr-2 py-1"><input class="inp" aria-label="Nombre" placeholder="Nuevo servicio" value="' + esc(p.nombre) + '"></td><td class="pr-2"><input class="inp" type="number" min="1" aria-label="Clases" value="' + esc(p.cantidad) + '"></td><td class="pr-2"><input class="inp" type="number" min="0" aria-label="Precio" value="' + esc(p.precio) + '"></td><td class="pr-2"><select class="inp" aria-label="Estado"><option' + (p.estado === 'Activo' ? ' selected' : '') + '>Activo</option><option' + (p.estado === 'Inactivo' ? ' selected' : '') + '>Inactivo</option></select></td><td class="pr-2"><select class="inp" aria-label="Clases que habilita">' + optC(p.cats) + '</select></td><td><button class="btn" onclick="savePack(' + i + ')">' + (p.id ? 'Guardar' : 'Crear') + '</button></td></tr>').join('') + '</tbody></table></div>';
+}
+async function savePack(i) {
+  const v = document.querySelector('tr[data-i="' + i + '"]').querySelectorAll('input,select'), b = S.apacks[i];
+  const r = await call('guardarOPaqueteServicio', { id: b ? b.id : '', nombre: v[0].value.trim(), cantidad: v[1].value, precio: v[2].value, estado: v[3].value, cats: v[4].value }, S.clave);
+  if (r && r.ok) { toast('Servicio guardado.'); render(); }
+}
+
+/* ---------- Clientes ---------- */
+async function loadClientes() { const r = await call('getClientesAdmin', S.clave); S.cls = (r && r.clientes) || []; }
+function drawClientes() {
+  $('#adm').innerHTML = '<div class="flex flex-wrap items-center gap-2 mb-3"><h3 class="mr-auto">Clientes</h3><input id="q" class="inp" style="max-width:240px" placeholder="Buscar por nombre o email" aria-label="Buscar" oninput="drawRows()"><select id="fe" class="inp" style="max-width:200px" aria-label="Filtrar por estado" onchange="drawRows()"><option value="">Todos los estados</option><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option><option value="Pendiente">Pendiente de activación</option></select><button class="btn" onclick="preAltaModal()">Nueva pre-alta</button></div><div class="overflow-x-auto"><table class="w-full text-left" style="min-width:980px"><thead class="t2 sm"><tr><th class="py-2">Nombre completo</th><th>Email</th><th>Teléfono</th><th>Pack actual</th><th>Créditos restantes</th><th>Pago</th><th>Estado de cuenta</th><th>Acciones</th></tr></thead><tbody id="tb"></tbody></table></div>';
+  drawRows();
+}
+function drawRows() {
+  const q = $('#q').value.toLowerCase().trim(), e = $('#fe').value;
+  const l = S.cls.filter(c => (!e || c.estado === e) && (!q || (c.nombre + ' ' + c.email).toLowerCase().includes(q)));
+  const chip = s => s === 'Activo' ? '<span class="chip g">Activo</span>' : s === 'Inactivo' ? '<span class="chip x">Inactivo</span>' : '<span class="chip w">Pendiente de activación</span>';
+  $('#tb').innerHTML = l.length ? l.map(c => {
+    const act = c.estado === 'Pendiente' ? '' : '<button class="btn s ' + (c.estado === 'Activo' ? 'r' : 'o') + '" onclick="toggleCli(\'' + c.id + '\',\'' + (c.estado === 'Activo' ? 'Inactivo' : 'Activo') + '\')">' + (c.estado === 'Activo' ? 'Desactivar' : 'Activar') + '</button>';
+    return '<tr style="border-top:1px solid var(--b)"><td class="py-2" style="font-weight:500">' + esc(c.nombre) + '</td><td>' + esc(c.email) + '</td><td>' + esc(c.telefono) + '</td><td>' + esc(c.pack) + '</td><td>' + c.creditos + (c.vencidas ? ' <span class="chip x">' + c.vencidas + ' vencidas</span>' : '') + '</td><td>' + pagoChip(c.pago) + '</td><td>' + chip(c.estado) + '</td><td><div class="flex items-center gap-1"><button class="btn s o" onclick="openFicha(\'' + c.id + '\')">Ficha</button>' + act + '<button class="ib" title="Eliminar cliente" aria-label="Eliminar cliente" onclick="eliminarCli(\'' + c.id + '\')">🗑</button></div></td></tr>';
+  }).join('') : '<tr><td colspan="8" class="t2 py-4">No hay clientes que coincidan con la búsqueda.</td></tr>';
+}
+async function eliminarCli(id) {
+  const c = S.cls.find(x => x.id === id);
+  if (!c) return;
+  if (!(await confirmar('Eliminar cliente', 'Se elimina a ' + c.nombre + ' con todo su historial (contrataciones y reservas). No se puede deshacer.', 'Eliminar'))) return;
+  const r = await call('eliminarClienteAdmin', id, S.clave);
+  if (r && r.ok) { toast(r.msg); await loadClientes(); drawRows(); }
+}
+async function toggleCli(id, est) { const r = await call('cambiarEstadoCliente', id, est, S.clave); if (r && r.ok) { await loadClientes(); drawRows(); } }
+
+/* Ficha del cliente: trazabilidad de packs, pagos y clases */
+async function openFicha(id) {
+  const [f, p] = await Promise.all([call('getFichaCliente', id, S.clave), call('getPacksYServicios', false, '')]);
+  if (!f || !f.ok) return;
+  S.ficha = { id: id, data: f, packs: Array.isArray(p) ? p : [] };
+  drawFicha();
+}
+async function recargarFicha() { await loadClientes(); if ($('#tb')) drawRows(); await openFicha(S.ficha.id); }
+
+function packCard(t) {
+  const hoy = iso(new Date());
+  const estado = t.estadoPago === 'Cancelado' ? '' : t.vencido ? '<span class="chip x">Vencido</span>' : t.fechaInicio > hoy ? '<span class="chip w">Empieza el ' + shortDate(t.fechaInicio) + '</span>' : '<span class="chip g">Vigente</span>';
+  const pu = t.clases ? Math.min(100, Math.round((t.usadas || 0) * 100 / t.clases)) : 0;
+  const campo = (l, v) => '<div><div class="t2 sm">' + l + '</div><div style="font-weight:500">' + v + '</div></div>';
+  return '<div class="p-4 mb-3" style="border:1px solid var(--b);border-radius:16px">' +
+    '<div class="flex flex-wrap items-center gap-2 mb-3"><div class="mr-auto"><div style="font-weight:500;font-size:15px">' + esc(t.servicio) + '</div><div class="t2 sm">' + money(t.precio) + '</div></div>' + estado + pagoChip(t.estadoPago) + '</div>' +
+    '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">' + campo('Contratado', shortDate(t.fechaContratacion)) + campo('Inicio', shortDate(t.fechaInicio)) + campo('Vence', shortDate(t.vence)) + campo('Pagó el', t.fechaPago ? shortDate(t.fechaPago) : '—') + '</div>' +
+    '<div class="flex items-center gap-3 mb-3"><div style="flex:1;height:8px;border-radius:999px;background:var(--bg);overflow:hidden"><div style="width:' + pu + '%;height:100%;background:var(--p)"></div></div><span class="sm" style="white-space:nowrap">' + (t.saldo == null ? '—' : 'Quedan <b>' + t.saldo + '</b> de ' + t.clases) + '</span></div>' +
+    '<div class="flex flex-wrap justify-end gap-2"><button class="btn s o" onclick="modalEditarPack(\'' + t.id + '\')">✏️ Editar</button><button class="btn s o" onclick="modalCambiarPago(\'' + t.id + '\')">Cambiar pago</button><button class="btn s r" onclick="eliminarPack(\'' + t.id + '\')">Eliminar pack</button></div></div>';
+}
+
+
+function drawFicha() {
+  const f = S.ficha.data, c = f.cliente, r = f.resumen;
+  const estCuenta = c.estado === 'Activo' ? '<span class="chip g">Activo</span>' : c.estado === 'Inactivo' ? '<span class="chip x">Inactivo</span>' : '<span class="chip w">Pendiente de activación</span>';
+  const kp = (v, l) => '<div class="kpi" style="padding:10px 12px"><span class="t2 sm">' + l + '</span><b style="font-size:20px">' + v + '</b></div>';
+  const contr = f.contrataciones.length ? f.contrataciones.map(packCard).join('') : '<p class="t2 py-2">Todavía no tiene packs contratados.</p>';
+  const est = x => x.estado === 'Asistio' ? '<span class="chip g">Asistió</span>' : x.estado === 'Falto' ? '<span class="chip x">Faltó</span>' : x.estado === 'Cancelada' ? '<span class="chip x">Cancelada</span>' : '<span class="chip">Pendiente</span>';
+  const res = f.reservas.length ? f.reservas.map(x => '<tr style="border-top:1px solid var(--b)"><td class="py-2">' + esc(longDate(x.fecha)) + ' · ' + t12(x.inicio) + '</td><td>' + esc(x.nombre) + '</td><td>' + est(x) + '</td></tr>').join('') : '<tr><td colspan="3" class="t2 py-3">Sin clases reservadas.</td></tr>';
+  openModal('<div class="flex flex-wrap items-center gap-2 mb-1"><h2 class="mr-auto">' + esc(c.nombre) + '</h2>' + estCuenta + '</div><div class="t2 mb-4">' + esc(c.email) + ' · ' + esc(c.telefono) + ' · Alta: ' + shortDate(c.alta) + '</div>' +
+    '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-5">' + kp(r.contratadas, 'Contratadas') + kp(r.agendadas, 'Reservadas') + kp(r.asistidas, 'Asistió') + kp(r.faltas, 'Faltas') + kp(r.restantes, 'Restantes') + kp(r.vencidas || 0, 'Vencidas') + '</div>' +
+    '<div class="flex items-center gap-2 mb-3"><h3 class="mr-auto">Packs contratados</h3><button class="btn" onclick="modalAsignarPack()">+ Asignar Pack</button></div>' + contr +
+    '<h3 class="mb-2 mt-5">Clases reservadas</h3><div style="max-height:240px;overflow:auto;border:1px solid var(--b);border-radius:12px;padding:0 12px"><table class="w-full text-left stk" style="min-width:420px"><thead class="t2 sm"><tr><th class="py-2">Fecha y hora</th><th>Clase</th><th>Asistencia</th></tr></thead><tbody>' + res + '</tbody></table></div>' +
+    '<div class="text-right mt-4"><button class="btn o" onclick="closeModal()">Cerrar</button></div>', 780);
+}
+
+function modalAsignarPack() {
+  const packs = S.ficha.packs;
+  openModal('<h2 class="mb-3">Asignar nuevo pack al cliente</h2><div class="grid gap-3"><div><label class="sm t2" for="ap_s">Seleccionar pack</label><select id="ap_s" class="inp">' + packs.map(x => '<option value="' + esc(x.id) + '">' + esc(x.nombre) + ' (' + x.cantidad + (x.cantidad === 1 ? ' clase' : ' clases') + ' - ' + money(x.precio) + ')</option>').join('') + '</select></div><div><label class="sm t2" for="ap_f">Fecha de inicio del pack</label><input id="ap_f" type="date" class="inp" value="' + iso(new Date()) + '"></div><div><label class="sm t2" for="ap_p">Estado del pago</label><select id="ap_p" class="inp">' + optsPago('Pagado') + '</select></div><div class="flex gap-2 justify-end"><button class="btn o" onclick="drawFicha()">Volver</button><button class="btn" onclick="asignarPack()">Asignar Pack</button></div></div>');
+}
+async function asignarPack() {
+  const r = await call('agregarContratacion', { idCliente: S.ficha.id, idServicio: $('#ap_s').value, fechaInicio: $('#ap_f').value, estadoPago: $('#ap_p').value }, S.clave);
+  if (r && r.ok) { toast(r.msg); await recargarFicha(); }
+}
+function packDe(id) { return S.ficha.data.contrataciones.find(x => x.id === id); }
+function modalEditarPack(id) {
+  const t = packDe(id);
+  S.editU = t.saldo == null ? 0 : t.usadas;
+  openModal('<h2 class="mb-1">Editar Pack Contratado</h2><p class="t2 mb-3">Servicio: <b>' + esc(t.servicio) + '</b></p><div class="grid gap-3"><div><label class="sm t2" for="ep_f">Fecha de inicio</label><input id="ep_f" type="date" class="inp" value="' + esc(t.fechaInicio) + '"></div>' +
+    '<div class="grid grid-cols-2 gap-3"><div><label class="sm t2" for="ep_t">Clases totales</label><input id="ep_t" type="number" min="1" class="inp" value="' + t.clases + '" oninput="syncResto()"></div><div><label class="sm t2" for="ep_r">Clases restantes</label><input id="ep_r" type="number" class="inp" value="' + (t.clases - S.editU) + '" oninput="syncTotal()"></div></div>' +
+    '<p class="t2 sm">Clases ya usadas en este pack: ' + S.editU + ' (las reservas se imputan al pack más antiguo primero).</p>' +
+    '<div><label class="sm t2" for="ep_p">Estado del pago</label><select id="ep_p" class="inp">' + optsPago(t.estadoPago) + '</select></div>' +
+    '<div class="flex gap-2 justify-end"><button class="btn o" onclick="drawFicha()">Volver</button><button class="btn" onclick="guardarEdicionPack(\'' + id + '\')">Guardar</button></div></div>');
+}
+function syncResto() { $('#ep_r').value = (parseInt($('#ep_t').value) || 0) - S.editU; }
+function syncTotal() { $('#ep_t').value = (parseInt($('#ep_r').value) || 0) + S.editU; }
+async function guardarEdicionPack(id) {
+  const total = parseInt($('#ep_t').value);
+  if (!(total >= 1)) { toast('Las clases totales deben ser 1 o más.'); return; }
+  if (total < S.editU) { toast('Las clases totales no pueden ser menores que las ya usadas (' + S.editU + ').'); return; }
+  const r = await call('editarContratacion', { idContratacion: id, fechaInicio: $('#ep_f').value, clasesTotales: total, estadoPago: $('#ep_p').value }, S.clave);
+  if (r && r.ok) { toast(r.msg); await recargarFicha(); }
+}
+function modalCambiarPago(id) {
+  const t = packDe(id);
+  openModal('<h2 class="mb-1">Cambiar estado del pago</h2><p class="t2 mb-3">' + esc(t.servicio) + ' · ' + money(t.precio) + '</p><div class="grid gap-3"><select id="cp_p" class="inp" aria-label="Estado del pago">' + optsPago(t.estadoPago) + '</select><div class="flex gap-2 justify-end"><button class="btn o" onclick="drawFicha()">Volver</button><button class="btn" onclick="guardarPago(\'' + id + '\')">Guardar</button></div></div>');
+}
+async function guardarPago(id) {
+  const r = await call('actualizarPagoContratacion', id, $('#cp_p').value, S.clave);
+  if (r && r.ok) { toast(r.msg); await recargarFicha(); }
+}
+async function eliminarPack(id) {
+  const t = packDe(id);
+  if (!(await confirmar('Eliminar pack', 'Se elimina "' + t.servicio + '" de este cliente junto con su registro de pago. Si solo querés anularlo, usá "Cambiar pago" → Cancelado.', 'Eliminar pack'))) return;
+  const r = await call('eliminarContratacion', id, S.clave);
+  if (r && r.ok) { toast(r.msg); await recargarFicha(); }
+}
+async function preAltaModal() {
+  const r = await call('getPacksYServicios', false, ''), p = Array.isArray(r) ? r : [];
+  openModal('<h2 class="mb-3">Pre-alta de cliente</h2><div class="grid gap-3"><div class="grid grid-cols-2 gap-3">' + field('pn', 'Nombre') + field('pa', 'Apellido') + '</div>' + field('pe', 'Dirección de correo electrónico', 'email') + field('pt', 'Número de teléfono', 'tel') +
+    '<div><label class="sm t2" for="pp">Pack inicial</label><select class="inp" id="pp">' + p.map(x => '<option value="' + esc(x.id) + '">' + esc(x.nombre) + ' (' + x.cantidad + ') · ' + money(x.precio) + '</option>').join('') + '</select></div>' +
+    '<div class="grid grid-cols-2 gap-3"><div><label class="sm t2" for="pf">Fecha de inicio</label><input class="inp" id="pf" type="date" value="' + iso(new Date()) + '"></div><div><label class="sm t2" for="ps">Estado del pago</label><select class="inp" id="ps">' + optsPago('Pendiente') + '</select></div></div>' +
+    '<div class="flex gap-2 justify-end"><button class="btn o" onclick="closeModal()">Cancelar</button><button class="btn" onclick="savePre()">Guardar pre-alta</button></div></div>');
+}
+async function savePre() {
+  const r = await call('preAltaCliente', { nombre: $('#pn').value, apellido: $('#pa').value, email: $('#pe').value, telefono: $('#pt').value, idServicio: $('#pp').value, fechaInicio: $('#pf').value, estadoPago: $('#ps').value }, S.clave);
+  if (r && r.ok) { closeModal(); toast(r.msg); await loadClientes(); drawRows(); }
+}
+
+const VERSION = 1;
+async function checkVersion() {
+  let msg = '';
+  try { const v = await api('versionApp'); if (v !== VERSION) msg = 'El Code.gs publicado es de otra versión (' + v + ') y esta pantalla es la v' + VERSION + '. Pegá el Code.gs v' + VERSION + ' y publicá una nueva versión.'; }
+  catch (e) { msg = 'El servidor no responde como la v' + VERSION + ': falta actualizar Code.gs y publicar una nueva versión (Implementar → Administrar implementaciones → Nueva versión).'; }
+  $('#aviso').innerHTML = msg ? '<div class="max-w-6xl mx-auto px-4 pt-3"><div class="p-3" style="background:#FEF7E0;border:1px solid #F9AB00;border-radius:12px">⚠️ ' + esc(msg) + '</div></div>' : '';
+}
+window.addEventListener('DOMContentLoaded', () => { render(); checkVersion(); });
+
+/* Modo demo: poné MODO_DEMO en false en tu instalación real */
+const MODO_DEMO = true;
+function drawDemo() {
+  const g = $('#app .grid.gap-3');
+  if (!MODO_DEMO || S.cli || S.admin || !g || $('#demo') || (S.view === 'cliente' && S.authTab !== 'in')) return;
+  g.insertAdjacentHTML('beforeend', '<p id="demo" class="t2 sm">Demo: ' + (S.view === 'admin' ? 'admin / admin123' : 'demo@pilates.com / demo123') + '</p>');
+}
+const _render = render, _auth = authView;
+render = async function () { await _render(); drawDemo(); };
+authView = function () { _auth(); drawDemo(); };
+
+
+
+</script>
+</body>
+</html>
